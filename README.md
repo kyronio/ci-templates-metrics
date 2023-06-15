@@ -40,8 +40,38 @@ ci_helm_restore_duration_sum_{status="success"} 7005.646230537002
 
 1. The `Receiver µservice` increases the correct `metrics` of the complete job
 
-## µServices
+## Receiver
 
-- [Receiver](/receiver/README.md)
+This µservice receives `HTTP` requests and increases the requested metrics.
 
-- [Exporter](/exporter/README.md)
+```sh
+receiver
+```
+
+### Receiving Metrics
+
+This µservice waits for `HTTP` requests to register metrics:
+
+```cmd
+curl -G -d started=2023-05023T13:01:00Z -d status=failed -d project=dummy-project -d name=dotnet_build http://localhost:80/steps
+```
+
+This will register the new CI job (if it's the first time its used) and increase it accordingly.
+
+## Exporter
+
+This µservice runs a sidecar to the `build` and `helper` containers and shares their volume mount.
+
+```sh
+exporter <file-path> <receiver-hostname>
+```
+
+At the end of each CI job, there is an `after_script` that echos some variables into a `.json` file:
+
+```sh
+after_script:
+  - mkdir -p /builds/.metrics
+  - echo '{"started":"'"$CI_JOB_STARTED_AT"'","status":"'"CI_JOB_STATUS"'","project":"'"CI_PROJECT_PATH"'","name":"'"$CI_JOB_NAME"'"}' > /builds/.metrics/metrics.json
+```
+
+The `Exporter` µservice will wait for this file and then send it to the [Reciever](/receiver/README.md) µservice which will export the metrics.

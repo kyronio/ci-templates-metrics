@@ -1,8 +1,9 @@
-package main
+package receiver
 
 import (
 	"fmt"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
@@ -48,7 +49,11 @@ func getParameters(r *http.Request) (string, string, string, float64) {
 	startedParsed := strings.Replace(started, "T", " ", -1)
 	startedParsed = strings.Replace(startedParsed, "Z", "", -1)
 	startedParsed = strings.Replace(startedParsed, "-", ".", -1)
-	startedAt := time.Parse("2006.01.02 15.04.05", startedParsed)
+	startedAt, err := time.Parse("2006.01.02 15.04.05", startedParsed)
+	if err != nil {
+		fmt.Printf("There was an error parsing the starting time %s/n%s", startedParsed, err)
+		os.Exit(0)
+	}
 	duration := time.Now().Sub(startedAt).Seconds()
 
 	fmt.Println(fmt.Printf("%f %s %s %s", duration, status, project, name))
@@ -78,7 +83,7 @@ func whileTrue() {
 	}
 }
 
-func main() {
+func RunReceiver() {
 	http.HandleFunc("/jobs", handleRequest)
 
 	http.Handle("/", promhttp.Handler())

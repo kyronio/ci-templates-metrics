@@ -2,8 +2,7 @@ FROM golang:1.20 AS build
 
 USER root
 WORKDIR /app
-COPY main.go main.go
-COPY go.mod  go.mod
+COPY . .
 
 RUN go get && go mod tidy
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o metricsparser main.go
