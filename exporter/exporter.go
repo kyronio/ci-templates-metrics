@@ -1,25 +1,26 @@
 package exporter
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"strings"
-	"time"
-
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promauto"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
-func main() {
-	metric := tryReadFile(os.Getenv("METRIC_PATH"))
-	sendMetricToServer(metric)
+// RunExporter waits for a .json file located in $METRIC_PATH to be created.
+// Then send it to the given $RECEIVER_SERVICE host.
+func RunExporter(path, receiverHost string) {
+	metric := tryReadFile(path)
+	sendMetricToServer(receiverHost, metric)
 }
 
+// tryReadFile waits for the metric .json file to be written and then returns it
 func tryReadFile(filePath string) []byte {
+	fmt.Printf("Waiting for %s to be created.", filePath)
 	for {
-		metric, err := ioutil.tryReadFile(filePath)
+		metric, err := ioutil.ReadFile(filePath)
 		if err == nil {
 			fmt.Println("Received metric: " + string(metric))
 			return metric
@@ -27,9 +28,10 @@ func tryReadFile(filePath string) []byte {
 	}
 }
 
-func sendMetricToServer(metric []byte) {
+// sendMetricToServer receives the metric and then sends it to the received receiver host
+func sendMetricToServer(host string, metric []byte) {
 	var result map[string]interface{}
-	if err := json.Unmarshasl(metric, &result); err != nil {
+	if err := json.Unmarshal(metric, &result); err != nil {
 		panic(err)
 	}
 
