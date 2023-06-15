@@ -74,4 +74,4 @@ after_script:
   - echo '{"started":"'"$CI_JOB_STARTED_AT"'","status":"'"CI_JOB_STATUS"'","project":"'"CI_PROJECT_PATH"'","name":"'"$CI_JOB_NAME"'"}' > /builds/.metrics/metrics.json
 ```
 
-The `Exporter` µservice will wait for this file and then send it to the [Reciever](/receiver/README.md) µservice which will export the metrics.
+The `Exporter` µservice will wait for this file and then send it to the [Reciever](/README.md/#receiver) µservice which will export the metrics.
