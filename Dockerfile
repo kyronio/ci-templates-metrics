@@ -9,9 +9,7 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o metricsparser main.go
 
 FROM alpine:3.14 AS run
 
-ENV RECEIVER_SERVICE=http://metrics:80
-ENV METRIC_PATH=/build/.metrics/metrics.json
-
+ENV TZ="Asia/Jerusalem"
 WORKDIR /app
 COPY --from=build /app/metricsparser /app/metricsparser
 
