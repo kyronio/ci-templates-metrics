@@ -44,8 +44,8 @@ ci_helm_restore_duration_sum_{status="success"} 7005.646230537002
 
 This µservice receives `HTTP` requests and increases the requested metrics.
 
-```sh
-receiver
+```cmd
+docker run -p 80:80 <image-name> receiver
 ```
 
 ### Receiving Metrics
@@ -53,7 +53,7 @@ receiver
 This µservice waits for `HTTP` requests to register metrics:
 
 ```cmd
-curl -G -d started=2023-05023T13:01:00Z -d status=failed -d project=dummy-project -d name=dotnet_build http://localhost:80/steps
+curl -G -d started=2023-05-23T13:01:00Z -d status=failed -d project=dummy-project -d name=dotnet_build http://localhost:80/jobs
 ```
 
 This will register the new CI job (if it's the first time its used) and increase it accordingly.
@@ -74,4 +74,40 @@ after_script:
   - echo '{"started":"'"$CI_JOB_STARTED_AT"'","status":"'"CI_JOB_STATUS"'","project":"'"CI_PROJECT_PATH"'","name":"'"$CI_JOB_NAME"'"}' > /builds/.metrics/metrics.json
 ```
 
-The `Exporter` µservice will wait for this file and then send it to the [Reciever](/README.md/#receiver) µservice which will export the metrics.
+The `Exporter` µservice will wait for this file and then send it to the [Receiver](/README.md/#receiver) µservice which will export the metrics.
+
+## See Yourself
+
+### Run the Receiver
+
+First make sure your [Receiver](/README.md/#receiver) is up and running.
+
+### Simulate CI Jobs
+
+Now we mimic a CI jobs usage scenario by running the [curl.bash](/docs/curl.sh) file which will mimic 5 minutes of `dotnet` CI usage.
+
+- Please make sure to override the `starting-time` value! Or all the jobs will arrive with an infinite duration.
+
+### Prometheus
+
+Collect the metrics using a [Prometheus](https://prometheus.io/) instance:
+
+![Prometheus Query](/docs/images/prometheus-dotnet-build-example.PNG)
+
+Or run a new instance using:
+
+```cmd
+docker run -p 9090:9090 -v path\to\prometheus.yml:/etc/prometheus/prometheus.yml prom/prometheus
+```
+
+### Grafana
+
+Next step is to connect your [Prometheus](https://prometheus.io/) instance to your [Grafana](https://grafana.com/) and create a [dashboard](/dashboards/ci-jobs-status.json):
+
+![Grafana Dashboard](/docs/images/grafana-dotnet-build-example.PNG)
+
+Or run a new Grafana instance by:
+
+```cmd
+docker run -d --name=grafana -p 3000:3000 grafana/grafana
+```
