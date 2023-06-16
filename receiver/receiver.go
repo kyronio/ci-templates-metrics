@@ -15,6 +15,7 @@ import (
 var (
 	allStepsCounter           = map[string]*prometheus.CounterVec{}
 	allStepsDurationHistogram = map[string]*prometheus.HistogramVec{}
+	timeZone                  = "Asia/Jerusalem"
 )
 
 // handleRequest registers and increases metrics for each CI job request that arrives
@@ -49,10 +50,10 @@ func getParameters(r *http.Request) (string, string, string, float64) {
 	startedParsed := strings.Replace(started, "T", " ", -1)
 	startedParsed = strings.Replace(startedParsed, "Z", "", -1)
 	startedParsed = strings.Replace(startedParsed, "-", ".", -1)
-	startedAt, err := time.Parse("2006.01.02 15.04.05", startedParsed)
+	startedParsed = strings.Replace(startedParsed, ":", ".", -1)
+	startedAt, err := time.ParseInLocation("2006.01.02 15.04.05", startedParsed, time.Local)
 	if err != nil {
-		fmt.Printf("There was an error parsing the starting time %s/n%s", startedParsed, err)
-		os.Exit(0)
+		fmt.Printf("There was an error parsing the starting time %s\n%s", startedParsed, err)
 	}
 	duration := time.Now().Sub(startedAt).Seconds()
 
@@ -84,10 +85,16 @@ func whileTrue() {
 }
 
 func RunReceiver() {
-	http.HandleFunc("/jobs", handleRequest)
+	os.Setenv("TZ", timeZone)
+	loc, _ := time.LoadLocation(timeZone)
+	time.Local = loc // -> this is setting the global timezone
 
+	http.HandleFunc("/jobs", handleRequest)
 	http.Handle("/", promhttp.Handler())
 	http.ListenAndServe(":80", nil)
+
+	fmt.Printf("Exporting metrics on / using port 80\n")
+	fmt.Printf("HTTP requests should be send to /jobs\n")
 
 	go whileTrue()
 }
