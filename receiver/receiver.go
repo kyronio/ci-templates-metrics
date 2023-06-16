@@ -57,7 +57,7 @@ func getParameters(r *http.Request) (string, string, string, float64) {
 	}
 	duration := time.Now().Sub(startedAt).Seconds()
 
-	fmt.Println(fmt.Printf("%s %s %f %s %s %s", time.Now(), startedAt, duration, status, project, name))
+	fmt.Println(fmt.Printf("%f %s %s %s", duration, status, project, name))
 	return project, status, name, duration
 }
 
