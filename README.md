@@ -111,3 +111,5 @@ Or run a new Grafana instance by:
 ```cmd
 docker run -d --name=grafana -p 3000:3000 grafana/grafana
 ```
+
+![gif here pls]()

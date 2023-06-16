@@ -1,3 +1,5 @@
 .gitignore
 LICENSE
 *.md
+docs/
+dashboards/
