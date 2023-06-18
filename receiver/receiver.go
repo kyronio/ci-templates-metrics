@@ -15,7 +15,7 @@ import (
 var (
 	totalJobsUsage = promauto.NewCounterVec(prometheus.CounterOpts{
 		Name: fmt.Sprintf("ci_total_jobs_usage"),
-		Help: fmt.Sprintf("How many times any of the jobs were usage"),
+		Help: fmt.Sprintf("How many times the jobs were used"),
 	},
 		[]string{"status"},
 	)
