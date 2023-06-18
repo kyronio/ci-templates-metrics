@@ -117,3 +117,15 @@ Or run a new Grafana instance by:
 ```cmd
 docker run -d --name=grafana -p 3000:3000 grafana/grafana
 ```
+
+#### General Section
+
+General information about the usage generally.
+
+![general row](/docs/images/general-section.PNG)
+
+#### Per Job Section
+
+Information about each CI job.
+
+![per job](/docs/images/per-job.PNG)

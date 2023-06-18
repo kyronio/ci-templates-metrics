@@ -13,6 +13,12 @@ import (
 )
 
 var (
+	totalJobsUsage = promauto.NewCounterVec(prometheus.CounterOpts{
+		Name: fmt.Sprintf("ci_total_jobs_usage"),
+		Help: fmt.Sprintf("How many times the jobs were used"),
+	},
+		[]string{"status"},
+	)
 	allStepsCounter           = map[string]*prometheus.CounterVec{}
 	allStepsDurationHistogram = map[string]*prometheus.HistogramVec{}
 	timeZone                  = "Asia/Jerusalem"
@@ -25,17 +31,16 @@ func handleRequest(w http.ResponseWriter, r *http.Request) {
 	splitJobName := strings.Split(name, "_")
 
 	_, ok := allStepsCounter[fmt.Sprintf("ci_%s_%s_total", splitJobName[0], splitJobName[1])]
-	// If key already registered
-	if ok {
-		increaseMetric(splitJobName[0], splitJobName[1], status, project, duration)
-	} else {
+	// If key is not already registered
+	if !ok {
 		registerNewJob(splitJobName[0], splitJobName[1])
-		increaseMetric(splitJobName[0], splitJobName[1], status, project, duration)
 	}
+	increaseMetric(splitJobName[0], splitJobName[1], status, project, duration)
 }
 
 // increaseMetric increasing both Counter and Histogram metrics for the received CI job
 func increaseMetric(framework, step, status, project string, duration float64) {
+	totalJobsUsage.WithLabelValues(status).Add(1)
 	allStepsCounter[fmt.Sprintf("ci_%s_%s_total", framework, step)].WithLabelValues(status, project).Add(1)
 	allStepsDurationHistogram[fmt.Sprintf("ci_%s_%s_duration", framework, step)].WithLabelValues(status).Observe(duration)
 }
