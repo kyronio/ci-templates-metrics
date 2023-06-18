@@ -4,6 +4,12 @@ There was a need to export metrics about the usage of our CI templates for KPI. 
 
 One way this can be achieved is by exporting Prometheus metrics and create a KPI dashboard that will show the overall usage of our CI templates.
 
+## Final Result
+
+Our final ci templates KPI dashboard looks like this:
+
+![KPI dashboard gif](/docs/images/kpi-example.gif)
+
 ## Metrics Example
 
 Registering a new CI job will result in the following metrics:
@@ -104,12 +110,10 @@ docker run -p 9090:9090 -v path\to\prometheus.yml:/etc/prometheus/prometheus.yml
 
 Next step is to connect your [Prometheus](https://prometheus.io/) instance to your [Grafana](https://grafana.com/) and create a [dashboard](/dashboards/ci-jobs-status.json):
 
-![Grafana Dashboard](/docs/images/grafana-dotnet-build-example.PNG)
+![Grafana Dashboard](/docs/images/grafana-dotnet-restore-example.PNG)
 
 Or run a new Grafana instance by:
 
 ```cmd
 docker run -d --name=grafana -p 3000:3000 grafana/grafana
 ```
-
-![gif here pls]()
